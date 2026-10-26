@@ -25,6 +25,7 @@ AtomBoxFrom = De
 AtomBoxFromTo = De / À
 AtomBoxMailbox = Boîte
 AtomBoxTags = Tags
+AtomBoxType_societe = Third parties
 AtomBoxType_propal = Propositions commerciales
 AtomBoxType_commande = Commandes clients
 AtomBoxType_facture = Factures clients

@@ -34,8 +34,8 @@ $sync = new AtomBoxSync($db, $client);
 $moi = $client->call('GET', '/application');
 if ($moi === null) { fwrite(STDERR, "AtomBox injoignable : {$client->error}\n"); exit(1); }
 echo "-- connecté à AtomBox : application « {$moi['nom']} », axes ".implode(', ', array_column($moi['axes'], 'id'))."\n";
-$h = $client->call('PATCH', '/application', array('hotes' => AtomBoxSync::messageIdHosts()));
-echo "-- hôtes déclarés : ".($h === null ? 'ÉCHEC '.$client->error : implode(', ', $h['parametres']['hotes']))."\n";
+$h = $client->call('PATCH', '/application', AtomBoxSync::instanceSettings());
+echo "-- instance déclarée : ".($h === null ? 'ÉCHEC '.$client->error : 'hôtes '.implode(', ', $h['parametres']['hotes']).', adresse '.$h['parametres']['url'])."\n";
 foreach ($sync->syncAll() as $el => $res) {
 	echo "-- $el : ".(is_array($res) ? "{$res[0]} créé(s), {$res[1]} modifié(s)" : "ÉCHEC $res")."\n";
 }

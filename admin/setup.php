@@ -29,9 +29,9 @@ if ($action === 'test') {
 	if ($retour === null) setEventMessages($langs->trans('AtomBoxUnreachable', $sync->client->error), null, 'errors');
 }
 if ($action === 'hosts') {
-	$r = $sync->client->call('PATCH', '/application', array('hotes' => AtomBoxSync::messageIdHosts()));
+	$r = $sync->client->call('PATCH', '/application', AtomBoxSync::instanceSettings());
 	if ($r === null) setEventMessages($sync->client->error, null, 'errors');
-	else setEventMessages($langs->trans('AtomBoxHostsDeclared', implode(', ', $r['parametres']['hotes'])), null);
+	else setEventMessages($langs->trans('AtomBoxHostsDeclared', implode(', ', $r['parametres']['hotes']).' — '.$r['parametres']['url']), null);
 }
 if ($action === 'sync') {
 	foreach ($sync->syncAll() as $el => $r) {

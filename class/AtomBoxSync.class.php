@@ -15,6 +15,9 @@ class AtomBoxSync
 	 * (relevés dans Dolibarr 24 : call_trigger des six classes)
 	 */
 	public static $TYPES = array(
+		// le TIERS (D189) : ses valeurs portent les adresses du tiers et de ses contacts ; AtomBox range
+		// par elles les messages reçus et envoyés (règle d'adresse)
+		'societe' => array('axe' => 'tiers', 'table' => 'societe', 'tab' => 'thirdparty', 'triggers' => 'COMPANY'),
 		'propal' => array('axe' => 'propal', 'table' => 'propal', 'tab' => 'propal', 'triggers' => 'PROPAL'),
 		'commande' => array('axe' => 'commande', 'table' => 'commande', 'tab' => 'order', 'triggers' => 'ORDER'),
 		'facture' => array('axe' => 'facture', 'table' => 'facture', 'tab' => 'invoice', 'triggers' => 'BILL'),
@@ -50,6 +53,7 @@ class AtomBoxSync
 	/** les valeurs d'un type, lues en base (une requête, pas un fetch par objet) */
 	public function values($element, $id = null)
 	{
+		if ($element === 'societe') return $this->thirdparties($id);
 		$t = self::$TYPES[$element];
 		$extra = $element === 'project' ? 'o.title' : ($element === 'invoice_supplier' ? 'o.ref_supplier' : "''");
 		$sql = 'SELECT o.rowid, o.ref, '.$extra.' as extra, s.nom FROM '.MAIN_DB_PREFIX.$t['table'].' as o'
@@ -61,6 +65,28 @@ class AtomBoxSync
 		while ($o = $this->db->fetch_object($res)) {
 			$out[] = array('valeur' => (string) $o->rowid, 'libelle' => self::label($o->ref, $o->extra, $o->nom),
 				'ref_externe' => array('type' => $element, 'id' => (int) $o->rowid));
+		}
+		return $out;
+	}
+
+	/** les tiers, avec leurs adresses : la leur et celles de leurs contacts (deux requêtes en tout) */
+	private function thirdparties($id = null)
+	{
+		$f = $id ? ' AND s.rowid = '.((int) $id) : '';
+		$adresses = array();
+		$r = $this->db->query('SELECT c.fk_soc, c.email FROM '.MAIN_DB_PREFIX.'socpeople as c JOIN '.MAIN_DB_PREFIX.'societe as s ON s.rowid = c.fk_soc'
+			." WHERE c.email <> '' AND s.entity IN (".getEntity('societe').')'.$f);
+		while ($r && ($o = $this->db->fetch_object($r))) $adresses[$o->fk_soc][] = strtolower(trim($o->email));
+		$out = array();
+		$r = $this->db->query('SELECT s.rowid, s.nom, s.name_alias, s.email, s.code_client, s.code_fournisseur FROM '.MAIN_DB_PREFIX.'societe as s'
+			.' WHERE s.entity IN ('.getEntity('societe').')'.$f);
+		if (!$r) { dol_syslog('AtomBox : '.$this->db->lasterror(), LOG_ERR); return $out; }
+		while ($o = $this->db->fetch_object($r)) {
+			$a = isset($adresses[$o->rowid]) ? $adresses[$o->rowid] : array();
+			if (trim((string) $o->email) !== '') $a[] = strtolower(trim($o->email));
+			$a = array_values(array_unique(array_filter($a, function ($x) { return strpos($x, '@') !== false; })));
+			$out[] = array('valeur' => (string) $o->rowid, 'libelle' => trim($o->nom.($o->name_alias ? ' ('.$o->name_alias.')' : '')),
+				'adresses' => $a, 'ref_externe' => array('type' => 'societe', 'id' => (int) $o->rowid));
 		}
 		return $out;
 	}
@@ -94,6 +120,14 @@ class AtomBoxSync
 		if ($inactive) return $this->push($element, array(array('valeur' => (string) $id, 'libelle' => '#'.$id, 'actif' => false)));
 		$v = $this->values($element, $id);
 		return $v ? $this->push($element, $v) : array(0, 0);
+	}
+
+	/** ce que le module déclare de son instance : les hôtes de ses Message-ID (D187) et son adresse,
+	 *  pour les liens vers ses fiches et la création d'un inconnu (D189, F149) */
+	public static function instanceSettings()
+	{
+		global $dolibarr_main_url_root;
+		return array('hotes' => self::messageIdHosts(), 'url' => rtrim((string) $dolibarr_main_url_root, '/'));
 	}
 
 	/** les hôtes des Message-ID de CETTE instance (CMailFile : dol_getprefix('email')) */

@@ -42,8 +42,12 @@ if ($type === 'thirdparty') restrictedArea($user, 'societe', $id, '&societe');
 $client = new AtomBoxClient();
 $messages = null; $detail = null;
 if ($client->isConfigured()) {
-	if ($type === 'thirdparty') {
-		// la fiche tiers : son adresse et celles de ses contacts
+	if ($type === 'thirdparty' && GETPOST('par', 'aZ09') !== 'adresses') {
+		// la fiche tiers passe par son TAG (D189) : ce que la règle d'adresse a rangé, envois compris
+		$adresses = array();
+		$q = $client->call('GET', '/messages', null, array('dossier' => 'tiers:'.$object->id, 'filtre' => 'tous'));
+	} elseif ($type === 'thirdparty') {
+		// repli : par les adresses, sans dépendre de la synchronisation (&par=adresses)
 		$adresses = array();
 		if (isValidEmail($object->email)) $adresses[] = strtolower($object->email);
 		$r = $db->query('SELECT email FROM '.MAIN_DB_PREFIX."socpeople WHERE fk_soc = ".((int) $object->id)." AND email <> ''");
@@ -69,7 +73,7 @@ if (!$client->isConfigured()) {
 } elseif ($messages === null) {
 	print '<div class="error">'.$langs->trans('AtomBoxUnreachable', dol_escape_htmltag($client->error)).'</div>';
 } else {
-	if ($type === 'thirdparty') print '<div class="opacitymedium">'.$langs->trans('AtomBoxThirdpartyHelp', dol_escape_htmltag(implode(', ', $adresses))).'</div><br>';
+	if ($type === 'thirdparty' && $adresses) print '<div class="opacitymedium">'.$langs->trans('AtomBoxThirdpartyHelp', dol_escape_htmltag(implode(', ', $adresses))).'</div><br>';
 	if (is_array($detail)) {
 		print '<table class="border centpercent tableforfield">';
 		print '<tr><td class="titlefield">'.$langs->trans('AtomBoxSubject').'</td><td><b>'.dol_escape_htmltag($detail['sujet']).'</b></td></tr>';

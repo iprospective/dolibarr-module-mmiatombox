@@ -24,6 +24,14 @@ class InterfaceAtomBoxTriggers extends DolibarrTriggers
 	{
 		if (!isModEnabled('atombox')) return 0;
 		require_once dol_buildpath('/atombox/class/AtomBoxSync.class.php');
+		// UN CONTACT change les adresses de SON tiers (D189) : c'est le tiers qu'on repousse
+		if (in_array($action, array('CONTACT_CREATE', 'CONTACT_MODIFY', 'CONTACT_DELETE'), true)) {
+			if (empty($object->socid)) return 0;
+			$sync = new AtomBoxSync($this->db, new AtomBoxClient(null, null, 2));
+			if ($sync->client->isConfigured() && $sync->syncOne('societe', $object->socid) === null)
+				dol_syslog('AtomBox : '.$action.' → tiers '.$object->socid.' non poussé ('.$sync->client->error.')', LOG_WARNING);
+			return 0;
+		}
 		foreach (AtomBoxSync::$TYPES as $element => $t) {
 			$p = $t['triggers'].'_';
 			if (strpos($action, $p) !== 0) continue;
