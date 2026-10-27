@@ -45,10 +45,12 @@ class modAtomBox extends DolibarrModules
 		$this->phpmin = array(7, 4);
 		$this->need_dolibarr_version = array(19, 0);
 
+		// la configuration SURVIT à une désactivation (dernier champ à 0) : la perdre obligerait à
+		// recréer un jeton côté AtomBox
 		$this->const = array(
-			0 => array('ATOMBOX_URL', 'chaine', '', "Adresse d'AtomBox (https://…)", 0, 'current', 1),
-			1 => array('ATOMBOX_TOKEN', 'chaine', '', "Jeton d'application AtomBox", 0, 'current', 1),
-			2 => array('ATOMBOX_LOGINS', 'texte', '', "Correspondance des comptes : une ligne « login Dolibarr = login AtomBox »", 0, 'current', 1),
+			0 => array('ATOMBOX_URL', 'chaine', '', "Adresse d'AtomBox (https://…)", 0, 'current', 0),
+			1 => array('ATOMBOX_TOKEN', 'chaine', '', "Jeton d'application AtomBox", 0, 'current', 0),
+			2 => array('ATOMBOX_LOGINS', 'texte', '', "Correspondance des comptes : une ligne « login Dolibarr = login AtomBox »", 0, 'current', 0),
 		);
 
 		$cond = '$user->hasRight("atombox", "read")';

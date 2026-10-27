@@ -20,6 +20,11 @@ $user->loadRights();
 $r = activateModule('modAtomBox');
 if (!empty($r['errors'])) { fwrite(STDERR, 'activation : '.implode(' ; ', $r['errors'])."\n"); exit(1); }
 echo "-- module activé\n";
+// activateModule ne réinsère pas les menus d'un module DÉJÀ actif : le menu « Courrier », ajouté
+// après la première activation, n'apparaissait pas
+require_once dol_buildpath('/atombox/core/modules/modAtomBox.class.php');
+$r = $db->query('SELECT count(*) as n FROM '.MAIN_DB_PREFIX."menu WHERE module = 'atombox'");
+if ($r && (int) $db->fetch_object($r)->n === 0) { $mod = new modAtomBox($db); $db->begin(); $mod->insert_menus(); $db->commit(); echo "-- menu « Courrier » posé\n"; }
 // le droit de lire les échanges, donné à l'administrateur
 $user->addrights(43782701); $user->loadRights('', 1);
 
