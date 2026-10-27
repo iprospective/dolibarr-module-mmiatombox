@@ -42,3 +42,4 @@ AtomBoxAttachments = Attachments
 AtomBoxAddToDocuments = Add to documents
 AtomBoxDocAdded = "%s" added to documents
 AtomBoxDocFailed = Attachment not saved: %s
+AtomBoxExchanges = exchange(s)

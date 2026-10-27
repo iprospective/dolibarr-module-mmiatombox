@@ -38,7 +38,7 @@ class modAtomBox extends DolibarrModules
 		$this->version = '0.1.0';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto = 'fa-envelope-open-text';
-		$this->module_parts = array('triggers' => 1);
+		$this->module_parts = array('triggers' => 1, 'hooks' => array('thirdpartycard'));
 		$this->config_page_url = array('setup.php@atombox');
 		$this->depends = array();
 		$this->langfiles = array('atombox@atombox');

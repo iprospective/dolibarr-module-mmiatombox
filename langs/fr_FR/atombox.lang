@@ -42,3 +42,4 @@ AtomBoxAttachments = Pièces jointes
 AtomBoxAddToDocuments = Ajouter aux documents
 AtomBoxDocAdded = « %s » ajouté aux documents
 AtomBoxDocFailed = Pièce non rangée : %s
+AtomBoxExchanges = échange(s)
