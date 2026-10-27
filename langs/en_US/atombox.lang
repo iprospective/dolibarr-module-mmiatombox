@@ -36,3 +36,5 @@ AtomBoxMail = Mail
 AtomBoxLogins = Account mapping
 AtomBoxLoginsHelp = One line per user: Dolibarr login = AtomBox login (same login by default). On AtomBox: python -m atombox.applications delegate --name … --login …
 AtomBoxNoDelegation = AtomBox refuses to open the mail of account "%s" for this instance (%s). The AtomBox administrator must delegate it to the application.
+AtomBoxOpenInMail = Open in Mail
+AtomBoxReplyInMail = Reply in Mail

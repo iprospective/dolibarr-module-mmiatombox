@@ -80,11 +80,14 @@ if (!$client->isConfigured()) {
 		print '<tr><td>'.$langs->trans('AtomBoxFrom').'</td><td>'.dol_escape_htmltag(trim($detail['from_nom'].' <'.$detail['from_adresse'].'>')).'</td></tr>';
 		print '<tr><td>'.$langs->trans('Date').'</td><td>'.dol_print_date(strtotime($detail['date_recue']), 'dayhour').'</td></tr>';
 		print '<tr><td colspan="2"><pre style="white-space:pre-wrap">'.dol_escape_htmltag((string) ($detail['corps'] ?? $detail['snippet'] ?? '')).'</pre></td></tr>';
-		print '</table><br>';
+		print '</table>';
+		print '<div class="tabsAction"><a class="butAction" href="'.dol_buildpath('/atombox/courrier.php', 1).'?msg='.urlencode($msg).'">'.img_picto('', 'fa-reply', 'class="pictofixedwidth"').$langs->trans('AtomBoxReplyInMail').'</a></div>';
 	}
 	print '<div class="div-table-responsive"><table class="tagtable liste centpercent">';
-	print '<tr class="liste_titre"><th></th><th>'.$langs->trans('Date').'</th><th>'.$langs->trans('AtomBoxFromTo').'</th><th>'.$langs->trans('AtomBoxSubject').'</th><th>'.$langs->trans('AtomBoxMailbox').'</th><th>'.$langs->trans('AtomBoxTags').'</th></tr>';
-	if (!$messages) print '<tr class="oddeven"><td colspan="6"><span class="opacitymedium">'.$langs->trans('AtomBoxNoMessage').'</span></td></tr>';
+	print '<tr class="liste_titre"><th></th><th>'.$langs->trans('Date').'</th><th>'.$langs->trans('AtomBoxFromTo').'</th><th>'.$langs->trans('AtomBoxSubject').'</th><th>'.$langs->trans('AtomBoxMailbox').'</th><th>'.$langs->trans('AtomBoxTags').'</th><th></th></tr>';
+	// F152 : « Ouvrir dans Courrier » — le webmail intégré, sur ce message, pour y répondre
+	$courrier = function ($id) { return dol_buildpath('/atombox/courrier.php', 1).'?msg='.urlencode($id); };
+	if (!$messages) print '<tr class="oddeven"><td colspan="7"><span class="opacitymedium">'.$langs->trans('AtomBoxNoMessage').'</span></td></tr>';
 	foreach ($messages as $m) {
 		$sortant = ($m['sens'] ?? 'in') === 'out';
 		// la liste ne sert pas les destinataires (le détail, si) : un envoi se lit par son expéditeur, flèche montante
@@ -97,7 +100,8 @@ if (!$client->isConfigured()) {
 		print '<td class="tdoverflowmax250">'.dol_escape_htmltag($qui).'</td>';
 		print '<td><a href="'.$lien.'">'.dol_escape_htmltag($m['sujet'] ?: '('.$langs->trans('AtomBoxNoSubject').')').'</a></td>';
 		print '<td class="opacitymedium">'.dol_escape_htmltag($m['boite']).'</td>';
-		print '<td>'.$tags.'</td></tr>';
+		print '<td>'.$tags.'</td>';
+		print '<td class="right nowraponall"><a class="butActionSmall" href="'.$courrier($m['id']).'" title="'.dol_escape_htmltag($langs->trans('AtomBoxOpenInMail')).'">'.img_picto('', 'fa-reply', 'class="pictofixedwidth"').$langs->trans('AtomBoxOpenInMail').'</a></td></tr>';
 	}
 	print '</table></div>';
 }
