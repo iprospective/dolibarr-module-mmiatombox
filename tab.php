@@ -41,6 +41,36 @@ if ($type === 'thirdparty') restrictedArea($user, 'societe', $id, '&societe');
 
 $client = new AtomBoxClient();
 $messages = null; $detail = null;
+
+/* F151 : RANGER UNE PIÈCE JOINTE dans les documents de l'objet — avec les droits de l'utilisateur
+   dans Dolibarr (AtomBox n'écrit jamais dans Dolibarr : c'est Dolibarr qui va chercher la pièce) */
+$DROITS = array('thirdparty' => array('societe', 'creer'), 'propal' => array('propal', 'creer'), 'order' => array('commande', 'creer'),
+	'invoice' => array('facture', 'creer'), 'project' => array('projet', 'creer'),
+	'supplier_order' => array('fournisseur', 'commande', 'creer'), 'supplier_invoice' => array('fournisseur', 'facture', 'creer'));
+$peutRanger = call_user_func_array(array($user, 'hasRight'), $DROITS[$type]);
+if (GETPOST('action', 'aZ09') === 'adddoc' && $peutRanger && $msg !== '') {
+	require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+	$pj = GETPOST('pj', 'alphanohtml');
+	$d = $client->call('GET', '/messages/'.rawurlencode($msg));
+	$piece = null;
+	foreach ((array) ($d['pieces_jointes'] ?? array()) as $p) { if ($p['pj_id'] === $pj) $piece = $p; }
+	$octets = $piece ? $client->raw('/messages/'.rawurlencode($msg).'/pieces-jointes/'.rawurlencode($pj)) : null;
+	$dir = getMultidirOutput($object, '', 1);
+	if ($octets === null || !$dir || strpos($dir, 'error-') === 0) {
+		setEventMessages($langs->trans('AtomBoxDocFailed', dol_escape_htmltag($client->error ?: $dir)), null, 'errors');
+	} else {
+		dol_mkdir($dir);
+		$nom = dol_sanitizeFileName($piece['nom'] ?: 'piece');
+		if (file_exists($dir.'/'.$nom)) $nom = dol_print_date(dol_now(), '%Y%m%d-%H%M%S').'-'.$nom;   // jamais écraser un document
+		if (file_put_contents($dir.'/'.$nom, $octets) === false) setEventMessages($langs->trans('AtomBoxDocFailed', $dir), null, 'errors');
+		else {
+			dolChmod($dir.'/'.$nom);
+			addFileIntoDatabaseIndex($dir, $nom, '', 'uploaded', 0, $object);
+			setEventMessages($langs->trans('AtomBoxDocAdded', $nom), null);
+		}
+	}
+	header('Location: '.$_SERVER['PHP_SELF'].'?type='.urlencode($type).'&id='.$object->id.'&msg='.urlencode($msg)); exit;
+}
 if ($client->isConfigured()) {
 	if ($type === 'thirdparty' && GETPOST('par', 'aZ09') !== 'adresses') {
 		// la fiche tiers passe par son TAG (D189) : ce que la règle d'adresse a rangé, envois compris
@@ -80,6 +110,21 @@ if (!$client->isConfigured()) {
 		print '<tr><td>'.$langs->trans('AtomBoxFrom').'</td><td>'.dol_escape_htmltag(trim($detail['from_nom'].' <'.$detail['from_adresse'].'>')).'</td></tr>';
 		print '<tr><td>'.$langs->trans('Date').'</td><td>'.dol_print_date(strtotime($detail['date_recue']), 'dayhour').'</td></tr>';
 		print '<tr><td colspan="2"><pre style="white-space:pre-wrap">'.dol_escape_htmltag((string) ($detail['corps'] ?? $detail['snippet'] ?? '')).'</pre></td></tr>';
+		$pieces = (array) ($detail['pieces_jointes'] ?? array());
+		if ($pieces) {
+			print '<tr><td>'.$langs->trans('AtomBoxAttachments').'</td><td>';
+			foreach ($pieces as $p) {
+				print '<div>'.img_picto('', 'fa-paperclip', 'class="pictofixedwidth"').dol_escape_htmltag($p['nom']).' <span class="opacitymedium">('.dol_print_size((int) $p['octets']).')</span>';
+				if ($peutRanger) {
+					print ' <form method="POST" action="'.$_SERVER['PHP_SELF'].'" style="display:inline"><input type="hidden" name="token" value="'.newToken().'">'
+						.'<input type="hidden" name="action" value="adddoc"><input type="hidden" name="type" value="'.dol_escape_htmltag($type).'"><input type="hidden" name="id" value="'.$object->id.'">'
+						.'<input type="hidden" name="msg" value="'.dol_escape_htmltag($msg).'"><input type="hidden" name="pj" value="'.dol_escape_htmltag($p['pj_id']).'">'
+						.'<button class="butActionSmall">'.img_picto('', 'fa-file-import', 'class="pictofixedwidth"').$langs->trans('AtomBoxAddToDocuments').'</button></form>';
+				}
+				print '</div>';
+			}
+			print '</td></tr>';
+		}
 		print '</table>';
 		print '<div class="tabsAction"><a class="butAction" href="'.dol_buildpath('/atombox/courrier.php', 1).'?msg='.urlencode($msg).'">'.img_picto('', 'fa-reply', 'class="pictofixedwidth"').$langs->trans('AtomBoxReplyInMail').'</a></div>';
 	}

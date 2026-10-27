@@ -38,3 +38,7 @@ AtomBoxLoginsHelp = One line per user: Dolibarr login = AtomBox login (same logi
 AtomBoxNoDelegation = AtomBox refuses to open the mail of account "%s" for this instance (%s). The AtomBox administrator must delegate it to the application.
 AtomBoxOpenInMail = Open in Mail
 AtomBoxReplyInMail = Reply in Mail
+AtomBoxAttachments = Attachments
+AtomBoxAddToDocuments = Add to documents
+AtomBoxDocAdded = "%s" added to documents
+AtomBoxDocFailed = Attachment not saved: %s

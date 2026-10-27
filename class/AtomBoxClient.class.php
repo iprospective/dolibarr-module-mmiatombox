@@ -27,6 +27,19 @@ class AtomBoxClient
 		return $this->url !== '' && $this->token !== '';
 	}
 
+	/** les OCTETS d'une ressource (une pièce jointe) ; null en cas d'échec */
+	public function raw($path)
+	{
+		$this->error = '';
+		if (!$this->isConfigured()) { $this->error = 'AtomBox non configuré'; return null; }
+		$c = curl_init($this->url.'/api/v1'.$path);
+		curl_setopt_array($c, array(CURLOPT_RETURNTRANSFER => true, CURLOPT_HTTPHEADER => array('Authorization: Bearer '.$this->token),
+			CURLOPT_CONNECTTIMEOUT => $this->timeout, CURLOPT_TIMEOUT => 60));
+		$out = curl_exec($c); $this->lastcode = (int) curl_getinfo($c, CURLINFO_HTTP_CODE); curl_close($c);
+		if ($out === false || $this->lastcode >= 400) { $this->error = 'HTTP '.$this->lastcode; return null; }
+		return $out;
+	}
+
 	/**
 	 * @return array|null la réponse décodée, ou null (raison dans $this->error)
 	 */
