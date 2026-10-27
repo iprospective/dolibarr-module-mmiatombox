@@ -18,6 +18,7 @@ if ($action === 'save') {
 	$jeton = GETPOST('ATOMBOX_TOKEN', 'none');
 	// le jeton ne se réaffiche jamais : un champ vide le laisse tel quel
 	if ($jeton !== '') dolibarr_set_const($db, 'ATOMBOX_TOKEN', trim($jeton), 'chaine', 0, '', $conf->entity);
+	dolibarr_set_const($db, 'ATOMBOX_LOGINS', trim(GETPOST('ATOMBOX_LOGINS', 'restricthtml')), 'texte', 0, '', $conf->entity);
 	setEventMessages($langs->trans('SetupSaved'), null);
 	header('Location: '.$_SERVER['PHP_SELF']); exit;
 }
@@ -48,6 +49,7 @@ print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden
 print '<table class="noborder centpercent"><tr class="liste_titre"><td>'.$langs->trans('Parameter').'</td><td>'.$langs->trans('Value').'</td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('AtomBoxURL').'</td><td><input class="minwidth400" name="ATOMBOX_URL" value="'.dol_escape_htmltag(getDolGlobalString('ATOMBOX_URL')).'" placeholder="https://atombox.exemple.fr"></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('AtomBoxToken').'</td><td><input class="minwidth400" type="password" name="ATOMBOX_TOKEN" value="" autocomplete="new-password" placeholder="'.(getDolGlobalString('ATOMBOX_TOKEN') ? $langs->trans('AtomBoxTokenKept') : 'abxapp_…').'"></td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('AtomBoxLogins').'<br><span class="opacitymedium small">'.$langs->trans('AtomBoxLoginsHelp').'</span></td><td><textarea class="minwidth400" rows="3" name="ATOMBOX_LOGINS" placeholder="admin = mathieu">'.dol_escape_htmltag(getDolGlobalString('ATOMBOX_LOGINS')).'</textarea></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('AtomBoxHosts').'</td><td><code>'.dol_escape_htmltag(implode(', ', AtomBoxSync::messageIdHosts())).'</code></td></tr>';
 print '</table><div class="center"><input type="submit" class="button" value="'.$langs->trans('Save').'"></div></form><br>';
 

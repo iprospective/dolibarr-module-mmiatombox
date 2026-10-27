@@ -32,3 +32,7 @@ AtomBoxType_facture = Factures clients
 AtomBoxType_project = Projets
 AtomBoxType_order_supplier = Commandes fournisseurs
 AtomBoxType_invoice_supplier = Factures fournisseurs
+AtomBoxMail = Courrier
+AtomBoxLogins = Correspondance des comptes
+AtomBoxLoginsHelp = Une ligne par utilisateur : login Dolibarr = login AtomBox (par défaut, le même login). Côté AtomBox : python -m atombox.applications delegate --name … --login …
+AtomBoxNoDelegation = AtomBox refuse d'ouvrir le courrier du compte « %s » pour cette instance (%s). L'administrateur d'AtomBox doit le déléguer à l'application.

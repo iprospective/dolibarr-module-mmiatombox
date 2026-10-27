@@ -48,6 +48,7 @@ class modAtomBox extends DolibarrModules
 		$this->const = array(
 			0 => array('ATOMBOX_URL', 'chaine', '', "Adresse d'AtomBox (https://…)", 0, 'current', 1),
 			1 => array('ATOMBOX_TOKEN', 'chaine', '', "Jeton d'application AtomBox", 0, 'current', 1),
+			2 => array('ATOMBOX_LOGINS', 'texte', '', "Correspondance des comptes : une ligne « login Dolibarr = login AtomBox »", 0, 'current', 1),
 		);
 
 		$cond = '$user->hasRight("atombox", "read")';
@@ -62,7 +63,11 @@ class modAtomBox extends DolibarrModules
 		$this->rights[0][3] = 1;
 		$this->rights[0][4] = 'read';
 
+		// « Courrier » : le webmail d'AtomBox dans la page de Dolibarr (F148)
 		$this->menu = array();
+		$this->menu[] = array('fk_menu' => '', 'type' => 'top', 'titre' => 'AtomBoxMail', 'prefix' => img_picto('', 'fa-envelope-open-text', 'class="pictofixedwidth"'),
+			'mainmenu' => 'atombox', 'leftmenu' => '', 'url' => '/atombox/courrier.php', 'langs' => 'atombox@atombox', 'position' => 1100,
+			'enabled' => 'isModEnabled("atombox")', 'perms' => '$user->hasRight("atombox", "read")', 'target' => '', 'user' => 2);
 	}
 
 	public function init($options = '')

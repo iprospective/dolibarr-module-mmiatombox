@@ -26,6 +26,8 @@ $user->addrights(43782701); $user->loadRights('', 1);
 $token = (string) getenv('ATOMBOX_TOKEN');
 dolibarr_set_const($db, 'ATOMBOX_URL', rtrim($url, '/'), 'chaine', 0, '', $conf->entity);
 if ($token !== '') dolibarr_set_const($db, 'ATOMBOX_TOKEN', $token, 'chaine', 0, '', $conf->entity);
+// la correspondance des comptes (F148), facultative : ATOMBOX_LOGINS="admin = mathieu"
+if (getenv('ATOMBOX_LOGINS') !== false) dolibarr_set_const($db, 'ATOMBOX_LOGINS', (string) getenv('ATOMBOX_LOGINS'), 'texte', 0, '', $conf->entity);
 echo "-- adresse ".rtrim($url, '/').($token !== '' ? ", jeton enregistré" : ", jeton inchangé")."\n";
 
 require_once dol_buildpath('/atombox/class/AtomBoxSync.class.php');

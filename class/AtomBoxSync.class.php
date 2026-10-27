@@ -130,6 +130,32 @@ class AtomBoxSync
 		return array('hotes' => self::messageIdHosts(), 'url' => rtrim((string) $dolibarr_main_url_root, '/'));
 	}
 
+	/** le compte AtomBox d'un utilisateur Dolibarr : la correspondance déclarée, sinon le même login */
+	public static function atomboxLogin($user)
+	{
+		foreach (preg_split('/\R/', getDolGlobalString('ATOMBOX_LOGINS')) as $l) {
+			$p = array_map('trim', explode('=', $l, 2));
+			if (count($p) === 2 && $p[0] !== '' && strtolower($p[0]) === strtolower($user->login)) return strtolower($p[1]);
+		}
+		return strtolower($user->login);
+	}
+
+	/**
+	 * la session DÉLÉGUÉE (F148) de l'utilisateur, gardée dans sa session Dolibarr et rouverte à
+	 * l'expiration ; null (raison dans $this->client->error) si AtomBox la refuse — compte non délégué
+	 */
+	public function delegatedSession($user, $force = false)
+	{
+		$k = 'atombox_session_'.((int) getDolGlobalInt('MAIN_MODULE_ATOMBOX'));
+		$s = isset($_SESSION[$k]) ? $_SESSION[$k] : null;
+		if (!$force && $s && $s['login'] === self::atomboxLogin($user) && strtotime($s['expire_le']) > time() + 300) return $s;
+		$r = $this->client->call('POST', '/application/sessions', array('login' => self::atomboxLogin($user)));
+		if ($r === null) { unset($_SESSION[$k]); return null; }
+		$s = array('jeton' => $r['jeton'], 'login' => $r['compte'], 'expire_le' => $r['expire_le']);
+		$_SESSION[$k] = $s;
+		return $s;
+	}
+
 	/** les hôtes des Message-ID de CETTE instance (CMailFile : dol_getprefix('email')) */
 	public static function messageIdHosts()
 	{
