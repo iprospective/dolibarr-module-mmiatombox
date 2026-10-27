@@ -20,7 +20,7 @@ $user->loadRights();
 // DÉSACTIVER PUIS RÉACTIVER, comme on le ferait dans l'interface : un module déjà actif ne reprend
 // ni ses menus ni ses crochets nouveaux. La configuration survit (constantes gardées à la désactivation) ;
 // les DROITS, eux, sont retirés à tous : rendus ci-dessous à l'administrateur seul — les autres sont à rendre.
-if (isModEnabled('atombox')) unActivateModule('modAtomBox', 0);
+if (isModEnabled('atombox')) { unActivateModule('modAtomBox', 0); $conf->setValues($db); }   // sans recharger, activateModule croit le module encore actif et ne fait rien
 $r = activateModule('modAtomBox');
 if (!empty($r['errors'])) { fwrite(STDERR, 'activation : '.implode(' ; ', $r['errors'])."\n"); exit(1); }
 echo "-- module (ré)activé\n";
