@@ -24,6 +24,11 @@ class InterfaceAtomBoxTriggers extends DolibarrTriggers
 	{
 		if (!isModEnabled('atombox')) return 0;
 		require_once dol_buildpath('/atombox/class/AtomBoxSync.class.php');
+		// UN PAIEMENT change l'encours du tiers (F047) : c'est le tiers qu'on repousse
+		if (in_array($action, array('BILL_PAYED', 'BILL_UNPAYED', 'BILL_CANCEL'), true)) {
+			if (!empty($object->socid)) { $s2 = new AtomBoxSync($this->db, new AtomBoxClient(null, null, 2)); if ($s2->client->isConfigured()) $s2->syncOne('societe', $object->socid); }
+			return 0;
+		}
 		// UN CONTACT change les adresses de SON tiers (D189) : c'est le tiers qu'on repousse
 		if (in_array($action, array('CONTACT_CREATE', 'CONTACT_MODIFY', 'CONTACT_DELETE'), true)) {
 			if (empty($object->socid)) return 0;
@@ -43,6 +48,8 @@ class InterfaceAtomBoxTriggers extends DolibarrTriggers
 			if (!$sync->client->isConfigured()) return 0;
 			$r = $sync->syncOne($element, $object->id, $suite === 'DELETE');
 			if ($r === null) dol_syslog('AtomBox : '.$action.' '.$object->id.' non poussé ('.$sync->client->error.')', LOG_WARNING);
+			// une proposition, une commande, une facture qui bouge change le CONTEXTE de son tiers (F047)
+			if (in_array($element, array('propal', 'commande', 'facture'), true) && !empty($object->socid)) $sync->syncOne('societe', $object->socid);
 			return 0;
 		}
 		return 0;

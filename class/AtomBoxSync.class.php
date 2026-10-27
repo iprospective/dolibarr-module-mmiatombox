@@ -77,6 +77,7 @@ class AtomBoxSync
 		$r = $this->db->query('SELECT c.fk_soc, c.email FROM '.MAIN_DB_PREFIX.'socpeople as c JOIN '.MAIN_DB_PREFIX.'societe as s ON s.rowid = c.fk_soc'
 			." WHERE c.email <> '' AND s.entity IN (".getEntity('societe').')'.$f);
 		while ($r && ($o = $this->db->fetch_object($r))) $adresses[$o->fk_soc][] = strtolower(trim($o->email));
+		$contextes = $this->contexts($id);
 		$out = array();
 		$r = $this->db->query('SELECT s.rowid, s.nom, s.name_alias, s.email, s.code_client, s.code_fournisseur FROM '.MAIN_DB_PREFIX.'societe as s'
 			.' WHERE s.entity IN ('.getEntity('societe').')'.$f);
@@ -86,7 +87,51 @@ class AtomBoxSync
 			if (trim((string) $o->email) !== '') $a[] = strtolower(trim($o->email));
 			$a = array_values(array_unique(array_filter($a, function ($x) { return strpos($x, '@') !== false; })));
 			$out[] = array('valeur' => (string) $o->rowid, 'libelle' => trim($o->nom.($o->name_alias ? ' ('.$o->name_alias.')' : '')),
-				'adresses' => $a, 'ref_externe' => array('type' => 'societe', 'id' => (int) $o->rowid));
+				'adresses' => $a, 'ref_externe' => array('type' => 'societe', 'id' => (int) $o->rowid,
+					'contexte' => isset($contextes[$o->rowid]) ? $contextes[$o->rowid] : self::emptyContext()));
+		}
+		return $out;
+	}
+
+	private static function emptyContext()
+	{
+		return array('encours' => 0.0, 'echu' => 0.0, 'devise' => getDolGlobalString('MAIN_MONNAIE', 'EUR'), 'objets' => array(), 'maj' => dol_print_date(dol_now(), 'dayhourrfc', 'gmt'));
+	}
+
+	/**
+	 * LE CONTEXTE MÉTIER de chaque tiers (F047), poussé avec lui : factures impayées (l'encours, et
+	 * l'échu), propositions ouvertes, commandes en cours. Trois requêtes pour tous les tiers, pas une
+	 * par tiers. L'encours est le TTC des factures validées non payées — les paiements partiels ne
+	 * sont pas déduits (à affiner : llx_paiement_facture).
+	 */
+	private function contexts($id = null)
+	{
+		$f = $id ? ' AND o.fk_soc = '.((int) $id) : '';
+		$now = $this->db->idate(dol_now());
+		$out = array();
+		$add = function ($soc, $o) use (&$out) {
+			if (!isset($out[$soc])) $out[$soc] = self::emptyContext();
+			$out[$soc]['objets'][] = $o;
+		};
+		$r = $this->db->query('SELECT o.rowid, o.ref, o.fk_soc, o.total_ttc, o.date_lim_reglement < \''.$now.'\' as echue FROM '.MAIN_DB_PREFIX.'facture as o'
+			.' WHERE o.fk_statut = 1 AND o.paye = 0 AND o.entity IN ('.getEntity('invoice').')'.$f.' ORDER BY o.date_lim_reglement');
+		while ($r && ($o = $this->db->fetch_object($r))) {
+			$add($o->fk_soc, array('axe' => 'facture', 'id' => (string) $o->rowid, 'reference' => $o->ref, 'libelle' => 'Facture',
+				'montant' => (float) $o->total_ttc, 'statut' => $o->echue ? 'échue' : 'impayée', 'etat' => $o->echue ? 'due' : 'wait'));
+			$out[$o->fk_soc]['encours'] += (float) $o->total_ttc;
+			if ($o->echue) $out[$o->fk_soc]['echu'] += (float) $o->total_ttc;
+		}
+		$r = $this->db->query('SELECT o.rowid, o.ref, o.fk_soc, o.total_ttc FROM '.MAIN_DB_PREFIX.'propal as o'
+			.' WHERE o.fk_statut = 1 AND o.entity IN ('.getEntity('propal').')'.$f.' ORDER BY o.date_valid DESC');
+		while ($r && ($o = $this->db->fetch_object($r))) {
+			$add($o->fk_soc, array('axe' => 'propal', 'id' => (string) $o->rowid, 'reference' => $o->ref, 'libelle' => 'Proposition',
+				'montant' => (float) $o->total_ttc, 'statut' => 'ouverte', 'etat' => 'wait'));
+		}
+		$r = $this->db->query('SELECT o.rowid, o.ref, o.fk_soc, o.total_ttc, o.fk_statut FROM '.MAIN_DB_PREFIX.'commande as o'
+			.' WHERE o.fk_statut IN (1, 2) AND o.entity IN ('.getEntity('commande').')'.$f.' ORDER BY o.date_valid DESC');
+		while ($r && ($o = $this->db->fetch_object($r))) {
+			$add($o->fk_soc, array('axe' => 'commande', 'id' => (string) $o->rowid, 'reference' => $o->ref, 'libelle' => 'Commande',
+				'montant' => (float) $o->total_ttc, 'statut' => ((int) $o->fk_statut === 2 ? 'en cours' : 'validée'), 'etat' => 'ok'));
 		}
 		return $out;
 	}
