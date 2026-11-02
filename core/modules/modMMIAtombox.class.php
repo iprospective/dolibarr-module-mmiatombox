@@ -7,7 +7,7 @@
  */
 
 /**
- * \file    core/modules/modAtomBox.class.php
+ * \file    core/modules/modMMIAtombox.class.php
  * \ingroup atombox
  * \brief   AtomBox — le courrier de l'entreprise relié aux objets de Dolibarr.
  *
@@ -21,13 +21,13 @@
  */
 include_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
 
-class modAtomBox extends DolibarrModules
+class modMMIAtombox extends DolibarrModules
 {
 	public function __construct($db)
 	{
 		$this->db = $db;
 		$this->numero = 437827;   // plage iProspective 437800-437850
-		$this->rights_class = 'atombox';
+		$this->rights_class = 'mmiatombox';
 		$this->family = 'crm';
 		$this->module_position = '91';
 		$this->name = preg_replace('/^mod/i', '', get_class($this));
@@ -39,9 +39,9 @@ class modAtomBox extends DolibarrModules
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto = 'fa-envelope-open-text';
 		$this->module_parts = array('triggers' => 1, 'hooks' => array('thirdpartycard'));
-		$this->config_page_url = array('setup.php@atombox');
-		$this->depends = array();
-		$this->langfiles = array('atombox@atombox');
+		$this->config_page_url = array('setup.php@mmiatombox');
+		$this->depends = array('modMMICommon');
+		$this->langfiles = array('mmiatombox@mmiatombox');
 		$this->phpmin = array(7, 4);
 		$this->need_dolibarr_version = array(19, 0);
 
@@ -53,10 +53,10 @@ class modAtomBox extends DolibarrModules
 			2 => array('ATOMBOX_LOGINS', 'texte', '', "Correspondance des comptes : une ligne « login Dolibarr = login AtomBox »", 0, 'current', 0),
 		);
 
-		$cond = '$user->hasRight("atombox", "read")';
+		$cond = '$user->hasRight("mmiatombox", "read")';
 		$this->tabs = array();
 		foreach (array('thirdparty', 'propal', 'order', 'invoice', 'project', 'supplier_order', 'supplier_invoice') as $type) {
-			$this->tabs[] = array('data' => $type.':+atombox:AtomBoxTab:atombox@atombox:'.$cond.':/atombox/tab.php?type='.$type.'&id=__ID__');
+			$this->tabs[] = array('data' => $type.':+mmiatombox:AtomBoxTab:mmiatombox@mmiatombox:'.$cond.':/mmiatombox/tab.php?type='.$type.'&id=__ID__');
 		}
 
 		$this->rights = array();
@@ -68,8 +68,8 @@ class modAtomBox extends DolibarrModules
 		// « Courrier » : le webmail d'AtomBox dans la page de Dolibarr (F148)
 		$this->menu = array();
 		$this->menu[] = array('fk_menu' => '', 'type' => 'top', 'titre' => 'AtomBoxMail', 'prefix' => img_picto('', 'fa-envelope-open-text', 'class="pictofixedwidth"'),
-			'mainmenu' => 'atombox', 'leftmenu' => '', 'url' => '/atombox/courrier.php', 'langs' => 'atombox@atombox', 'position' => 1100,
-			'enabled' => 'isModEnabled("atombox")', 'perms' => '$user->hasRight("atombox", "read")', 'target' => '', 'user' => 2);
+			'mainmenu' => 'mmiatombox', 'leftmenu' => '', 'url' => '/mmiatombox/courrier.php', 'langs' => 'mmiatombox@mmiatombox', 'position' => 1100,
+			'enabled' => 'isModEnabled("mmiatombox")', 'perms' => '$user->hasRight("mmiatombox", "read")', 'target' => '', 'user' => 2);
 	}
 
 	public function init($options = '')

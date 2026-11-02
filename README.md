@@ -1,4 +1,4 @@
-# AtomBox pour Dolibarr
+# MMI Atombox pour Dolibarr
 
 Relie Dolibarr à [AtomBox](https://atombox.iprospective.eu) : le courrier de l'entreprise rangé sur
 les objets de Dolibarr.
@@ -18,7 +18,7 @@ AtomBox n'appelle jamais Dolibarr : c'est le module qui appelle AtomBox, avec un
 
 1. Côté AtomBox, créer l'application et son jeton (affiché une seule fois) :
    `python -m atombox.applications create --name dolibarr --type dolibarr --domain exemple.fr`
-2. Déposer le module dans `htdocs/custom/atombox`, l'activer.
+2. Déposer le module dans `htdocs/custom/mmiatombox`, l'activer.
 3. Réglages du module : adresse d'AtomBox, jeton ; puis « Déclarer les hôtes » et « Synchroniser les
    objets ».
 4. Pour que les envois de Dolibarr soient eux aussi rangés : `MAIL_AUTOCOPY_TO` vers la boîte relevée

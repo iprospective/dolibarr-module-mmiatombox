@@ -20,11 +20,11 @@ $user->loadRights();
 // DÉSACTIVER PUIS RÉACTIVER, comme on le ferait dans l'interface : un module déjà actif ne reprend
 // ni ses menus ni ses crochets nouveaux. La configuration survit (constantes gardées à la désactivation) ;
 // les DROITS, eux, sont retirés à tous : rendus ci-dessous à l'administrateur seul — les autres sont à rendre.
-if (isModEnabled('atombox')) { unActivateModule('modAtomBox', 0); $conf->setValues($db); }   // sans recharger, activateModule croit le module encore actif et ne fait rien
-$r = activateModule('modAtomBox');
+if (isModEnabled('mmiatombox')) { unActivateModule('modMMIAtombox', 0); $conf->setValues($db); }   // sans recharger, activateModule croit le module encore actif et ne fait rien
+$r = activateModule('modMMIAtombox');
 if (!empty($r['errors'])) { fwrite(STDERR, 'activation : '.implode(' ; ', $r['errors'])."\n"); exit(1); }
 echo "-- module (ré)activé\n";
-$r = $db->query('SELECT count(*) as n FROM '.MAIN_DB_PREFIX."menu WHERE module = 'atombox'");
+$r = $db->query('SELECT count(*) as n FROM '.MAIN_DB_PREFIX."menu WHERE module = 'mmiatombox'");
 echo "-- menu « Courrier » : ".($r ? (int) $db->fetch_object($r)->n : 0)." entrée(s) ; crochets : ".getDolGlobalString('MAIN_MODULE_ATOMBOX_HOOKS')."\n";
 // le droit de lire les échanges, donné à l'administrateur
 $user->addrights(43782701); $user->loadRights('', 1);
@@ -36,7 +36,7 @@ if ($token !== '') dolibarr_set_const($db, 'ATOMBOX_TOKEN', $token, 'chaine', 0,
 if (getenv('ATOMBOX_LOGINS') !== false) dolibarr_set_const($db, 'ATOMBOX_LOGINS', (string) getenv('ATOMBOX_LOGINS'), 'texte', 0, '', $conf->entity);
 echo "-- adresse ".rtrim($url, '/').($token !== '' ? ", jeton enregistré" : ", jeton inchangé")."\n";
 
-require_once dol_buildpath('/atombox/class/AtomBoxSync.class.php');
+require_once dol_buildpath('/mmiatombox/class/AtomBoxSync.class.php');
 $client = new AtomBoxClient(rtrim($url, '/'), $token !== '' ? $token : getDolGlobalString('ATOMBOX_TOKEN'));
 $sync = new AtomBoxSync($db, $client);
 $moi = $client->call('GET', '/application');

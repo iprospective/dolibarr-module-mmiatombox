@@ -12,10 +12,10 @@ $res = 0;
 if (!$res && file_exists('../main.inc.php')) $res = @include '../main.inc.php';
 if (!$res && file_exists('../../main.inc.php')) $res = @include '../../main.inc.php';
 if (!$res) die('Include of main fails');
-require_once dol_buildpath('/atombox/class/AtomBoxSync.class.php');
+require_once dol_buildpath('/mmiatombox/class/AtomBoxSync.class.php');
 
-$langs->loadLangs(array('companies', 'atombox@atombox'));
-if (!$user->hasRight('atombox', 'read')) accessforbidden();
+$langs->loadLangs(array('companies', 'mmiatombox@mmiatombox'));
+if (!$user->hasRight('mmiatombox', 'read')) accessforbidden();
 
 $type = GETPOST('type', 'aZ09');
 $id = (int) GETPOST('id', 'int');   // GETPOSTINT n'existe pas en 19
@@ -126,12 +126,12 @@ if (!$client->isConfigured()) {
 			print '</td></tr>';
 		}
 		print '</table>';
-		print '<div class="tabsAction"><a class="butAction" href="'.dol_buildpath('/atombox/courrier.php', 1).'?msg='.urlencode($msg).'">'.img_picto('', 'fa-reply', 'class="pictofixedwidth"').$langs->trans('AtomBoxReplyInMail').'</a></div>';
+		print '<div class="tabsAction"><a class="butAction" href="'.dol_buildpath('/mmiatombox/courrier.php', 1).'?msg='.urlencode($msg).'">'.img_picto('', 'fa-reply', 'class="pictofixedwidth"').$langs->trans('AtomBoxReplyInMail').'</a></div>';
 	}
 	print '<div class="div-table-responsive"><table class="tagtable liste centpercent">';
 	print '<tr class="liste_titre"><th></th><th>'.$langs->trans('Date').'</th><th>'.$langs->trans('AtomBoxFromTo').'</th><th>'.$langs->trans('AtomBoxSubject').'</th><th>'.$langs->trans('AtomBoxMailbox').'</th><th>'.$langs->trans('AtomBoxTags').'</th><th></th></tr>';
 	// F152 : « Ouvrir dans Courrier » — le webmail intégré, sur ce message, pour y répondre
-	$courrier = function ($id) { return dol_buildpath('/atombox/courrier.php', 1).'?msg='.urlencode($id); };
+	$courrier = function ($id) { return dol_buildpath('/mmiatombox/courrier.php', 1).'?msg='.urlencode($id); };
 	if (!$messages) print '<tr class="oddeven"><td colspan="7"><span class="opacitymedium">'.$langs->trans('AtomBoxNoMessage').'</span></td></tr>';
 	foreach ($messages as $m) {
 		$sortant = ($m['sens'] ?? 'in') === 'out';

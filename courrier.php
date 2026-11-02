@@ -14,10 +14,10 @@ $res = 0;
 if (!$res && file_exists('../main.inc.php')) $res = @include '../main.inc.php';
 if (!$res && file_exists('../../main.inc.php')) $res = @include '../../main.inc.php';
 if (!$res) die('Include of main fails');
-require_once dol_buildpath('/atombox/class/AtomBoxSync.class.php');
+require_once dol_buildpath('/mmiatombox/class/AtomBoxSync.class.php');
 
-$langs->loadLangs(array('atombox@atombox'));
-if (!$user->hasRight('atombox', 'read')) accessforbidden();
+$langs->loadLangs(array('mmiatombox@mmiatombox'));
+if (!$user->hasRight('mmiatombox', 'read')) accessforbidden();
 
 $sync = new AtomBoxSync($db);
 $session = $sync->client->isConfigured() ? $sync->delegatedSession($user, GETPOST('renouveler', 'int') ? true : false) : null;

@@ -8,7 +8,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/triggers/dolibarrtriggers.class.php';
  * devient inactif. AtomBox injoignable ne bloque JAMAIS Dolibarr : l'échec se journalise, l'objet
  * s'enregistre, et « Synchroniser » rattrape plus tard.
  */
-class InterfaceAtomBoxTriggers extends DolibarrTriggers
+class InterfaceMMIAtomboxTriggers extends DolibarrTriggers
 {
 	public function __construct($db)
 	{
@@ -22,8 +22,8 @@ class InterfaceAtomBoxTriggers extends DolibarrTriggers
 
 	public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
 	{
-		if (!isModEnabled('atombox')) return 0;
-		require_once dol_buildpath('/atombox/class/AtomBoxSync.class.php');
+		if (!isModEnabled('mmiatombox')) return 0;
+		require_once dol_buildpath('/mmiatombox/class/AtomBoxSync.class.php');
 		// UN PAIEMENT change l'encours du tiers (F047) : c'est le tiers qu'on repousse
 		if (in_array($action, array('BILL_PAYED', 'BILL_UNPAYED', 'BILL_CANCEL'), true)) {
 			if (!empty($object->socid)) { $s2 = new AtomBoxSync($this->db, new AtomBoxClient(null, null, 2)); if ($s2->client->isConfigured()) $s2->syncOne('societe', $object->socid); }

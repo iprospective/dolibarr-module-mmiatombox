@@ -6,9 +6,9 @@ if (!$res && file_exists('../../main.inc.php')) $res = @include '../../main.inc.
 if (!$res && file_exists('../../../main.inc.php')) $res = @include '../../../main.inc.php';
 if (!$res) die('Include of main fails');
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
-require_once dol_buildpath('/atombox/class/AtomBoxSync.class.php');
+require_once dol_buildpath('/mmiatombox/class/AtomBoxSync.class.php');
 
-$langs->loadLangs(array('admin', 'atombox@atombox'));
+$langs->loadLangs(array('admin', 'mmiatombox@mmiatombox'));
 if (!$user->admin) accessforbidden();
 $action = GETPOST('action', 'aZ09');
 
