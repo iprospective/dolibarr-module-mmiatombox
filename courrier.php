@@ -23,7 +23,7 @@ $sync = new AtomBoxSync($db);
 $session = $sync->client->isConfigured() ? $sync->delegatedSession($user, GETPOST('renouveler', 'int') ? true : false) : null;
 $msg = GETPOST('msg', 'alphanohtml');
 
-llxHeader('', $langs->trans('AtomBoxMail'), '', '', 0, 0, '', '', '', 'mod-atombox page-courrier');
+llxHeader('', $langs->trans('AtomBoxMail'), '', '', 0, 0, '', '', '', 'mod-mmiatombox page-courrier');
 if (!$sync->client->isConfigured()) {
 	print '<div class="warning">'.$langs->trans('AtomBoxNotConfigured').'</div>';
 } elseif ($session === null) {

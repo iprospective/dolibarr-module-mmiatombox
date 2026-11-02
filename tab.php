@@ -94,7 +94,7 @@ if ($client->isConfigured()) {
 
 llxHeader('', $langs->trans('AtomBoxTab'));
 $head = $entete($object);
-print dol_get_fiche_head($head, 'atombox', $langs->trans('AtomBoxTab'), -1, $picto);
+print dol_get_fiche_head($head, 'mmiatombox', $langs->trans('AtomBoxTab'), -1, $picto);
 dol_banner_tab($object, 'id', '', 0, 'rowid', $type === 'thirdparty' ? 'nom' : 'ref', '', '&type='.$type);
 print '<div class="fichecenter"><div class="underbanner clearboth"></div>';
 
